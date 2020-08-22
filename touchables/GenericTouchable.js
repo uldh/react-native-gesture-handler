@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Animated, Platform } from 'react-native';
 import { State, BaseButton } from '../GestureHandler';
 import PropTypes from 'prop-types';
+import SoundManager from 'react-native/Libraries/Components/Sound/SoundManager';
 
 /**
  * Each touchable is a states' machine which preforms transitions.
@@ -70,6 +71,7 @@ export default class GenericTouchable extends Component {
     extraButtonProps: {
       rippleColor: 'transparent',
     },
+    touchSoundDisabled: false,
   };
 
   // timeout handlers
@@ -188,6 +190,12 @@ export default class GenericTouchable extends Component {
     this.pointerInside = pointerInside;
   };
 
+  playSound() {
+    if (Platform.OS === 'android' && !this.props.touchSoundDisabled) {
+      SoundManager.playTouchSound();
+    }
+  }
+
   onHandlerStateChange = ({ nativeEvent }) => {
     const { state } = nativeEvent;
     if (state === State.CANCELLED || state === State.FAILED) {
@@ -210,6 +218,7 @@ export default class GenericTouchable extends Component {
       this.handleGoToUndetermined();
       if (shouldCallOnPress) {
         // Calls only inside component whether no long press was called previously
+        this.playSound();
         this.props.onPress && this.props.onPress();
       }
     }
